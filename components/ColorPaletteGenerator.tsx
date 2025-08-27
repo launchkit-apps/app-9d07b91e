@@ -5,36 +5,63 @@ import React, { useState, useEffect } from 'react';
 export default function ColorPaletteGenerator() {
   const [palettes, setPalettes] = useState([]);
 
-  const generateColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+  const generateColor = () => {
+    const color = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+    return color.length === 7 ? color : '#000000'; // Fallback if generation fails
+  };
+
+  const initializePalettes = () => {
+    try {
+      const initialPalettes = Array(3).fill(null).map(() => ({
+        id: Math.random().toString(36).substring(2, 11),
+        colors: Array(5).fill(null).map(() => generateColor()),
+        isSaved: false
+      }));
+      setPalettes(initialPalettes);
+    } catch (error) {
+      console.error('Error initializing palettes:', error);
+      setPalettes([]); // Set empty array as fallback
+    }
+  };
 
   useEffect(() => {
-    const initialPalettes = Array(3).fill(null).map(() => ({
-      id: Math.random().toString(36).substr(2, 9),
-      colors: Array(5).fill(null).map(generateColor),
-      isSaved: false
-    }));
-    setPalettes(initialPalettes);
+    initializePalettes();
   }, []);
 
   const copyColor = (color) => {
-    navigator.clipboard.writeText(color);
-    alert('Color code copied!');
+    try {
+      navigator.clipboard.writeText(color);
+      alert('Color code copied!');
+    } catch (error) {
+      console.error('Failed to copy:', error);
+      alert('Failed to copy color code');
+    }
   };
 
   const toggleSave = (id) => {
-    setPalettes(palettes.map(p => 
-      p.id === id ? {...p, isSaved: !p.isSaved} : p
-    ));
+    try {
+      setPalettes(currentPalettes => 
+        currentPalettes.map(p => 
+          p.id === id ? {...p, isSaved: !p.isSaved} : p
+        )
+      );
+    } catch (error) {
+      console.error('Error toggling save:', error);
+    }
   };
 
   const generateMore = () => {
-    const saved = palettes.filter(p => p.isSaved);
-    const newPalettes = Array(3 - saved.length).fill(null).map(() => ({
-      id: Math.random().toString(36).substr(2, 9),
-      colors: Array(5).fill(null).map(generateColor),
-      isSaved: false
-    }));
-    setPalettes([...saved, ...newPalettes]);
+    try {
+      const saved = palettes.filter(p => p.isSaved);
+      const newPalettes = Array(3 - saved.length).fill(null).map(() => ({
+        id: Math.random().toString(36).substring(2, 11),
+        colors: Array(5).fill(null).map(() => generateColor()),
+        isSaved: false
+      }));
+      setPalettes([...saved, ...newPalettes]);
+    } catch (error) {
+      console.error('Error generating more palettes:', error);
+    }
   };
 
   return (
@@ -42,19 +69,19 @@ export default function ColorPaletteGenerator() {
       <h1 className="text-2xl font-bold mb-4">Color Palette Generator</h1>
       
       <div className="space-y-4">
-        {palettes.map((palette) => (
+        {palettes && palettes.map((palette) => (
           <div key={palette.id} className="bg-white p-4 rounded shadow">
             <div className="flex mb-2">
-              {palette.colors.map((color, i) => (
+              {palette.colors && palette.colors.map((color, i) => (
                 <div 
                   key={i}
                   onClick={() => copyColor(color)}
                   className="flex-1 h-20 cursor-pointer relative group"
-                  style={{ backgroundColor: color }}
+                  style={{ backgroundColor: color || '#000000' }}
                 >
                   <span className="absolute bottom-0 left-0 right-0 text-center bg-black/50 text-white 
                                  text-xs py-1 opacity-0 group-hover:opacity-100">
-                    {color}
+                    {color.toUpperCase()}
                   </span>
                 </div>
               ))}
@@ -62,7 +89,7 @@ export default function ColorPaletteGenerator() {
             <button
               onClick={() => toggleSave(palette.id)}
               className={`${palette.isSaved ? 'bg-red-500' : 'bg-green-500'} 
-                         text-white px-4 py-2 rounded`}
+                         text-white px-4 py-2 rounded hover:opacity-90`}
             >
               {palette.isSaved ? 'Unsave' : 'Save'}
             </button>
@@ -72,7 +99,7 @@ export default function ColorPaletteGenerator() {
 
       <button
         onClick={generateMore}
-        className="mt-4 bg-blue-500 text-white px-6 py-2 rounded"
+        className="mt-4 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
       >
         Generate More
       </button>
