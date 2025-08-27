@@ -5,10 +5,8 @@ import React, { useState, useEffect } from 'react';
 export default function ColorPaletteGenerator() {
   const [palettes, setPalettes] = useState([]);
 
-  // Generate a random hex color
   const generateColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
 
-  // Initialize palettes
   useEffect(() => {
     const initialPalettes = Array(3).fill(null).map(() => ({
       id: Math.random().toString(36).substr(2, 9),
@@ -18,20 +16,17 @@ export default function ColorPaletteGenerator() {
     setPalettes(initialPalettes);
   }, []);
 
-  // Copy color code
   const copyColor = (color) => {
     navigator.clipboard.writeText(color);
     alert('Color code copied!');
   };
 
-  // Toggle save palette
   const toggleSave = (id) => {
     setPalettes(palettes.map(p => 
       p.id === id ? {...p, isSaved: !p.isSaved} : p
     ));
   };
 
-  // Generate more palettes
   const generateMore = () => {
     const saved = palettes.filter(p => p.isSaved);
     const newPalettes = Array(3 - saved.length).fill(null).map(() => ({
