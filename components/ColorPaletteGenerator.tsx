@@ -1,18 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
 export default function ColorPaletteGenerator() {
-  const [palettes, setPalettes] = useState([]);
+  const [palettes, setPalettes] = React.useState([]);
 
-  const generateColor = () => {
-    return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-  };
+  const generateColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
 
-  useEffect(() => {
-    const initial = Array(3).fill(null).map(() => ({
-      id: Math.random().toString(36).slice(2, 9),
-      colors: Array(5).fill(null).map(generateColor),
+  React.useEffect(() => {
+    const initial = [1,2,3].map(() => ({
+      id: Math.random().toString(36).slice(2,9),
+      colors: [1,2,3,4,5].map(() => generateColor()),
       isSaved: false
     }));
     setPalettes(initial);
@@ -20,49 +18,49 @@ export default function ColorPaletteGenerator() {
 
   const copyColor = (color) => {
     navigator.clipboard.writeText(color);
-    alert('Copied to clipboard!');
+    alert('Copied!');
   };
 
   const toggleSave = (id) => {
-    setPalettes(current => 
-      current.map(p => p.id === id ? {...p, isSaved: !p.isSaved} : p)
-    );
+    setPalettes(prev => prev.map(p => 
+      p.id === id ? {...p, isSaved: !p.isSaved} : p
+    ));
   };
 
   const generateMore = () => {
     const saved = palettes.filter(p => p.isSaved);
-    const newPalettes = Array(3 - saved.length).fill(null).map(() => ({
-      id: Math.random().toString(36).slice(2, 9),
-      colors: Array(5).fill(null).map(generateColor),
+    const newOnes = Array(3 - saved.length).fill(null).map(() => ({
+      id: Math.random().toString(36).slice(2,9),
+      colors: [1,2,3,4,5].map(() => generateColor()),
       isSaved: false
     }));
-    setPalettes([...saved, ...newPalettes]);
+    setPalettes([...saved, ...newOnes]);
   };
 
   return (
-    <div className="p-6 min-h-screen bg-gray-100">
-      <h1 className="text-3xl font-bold mb-6">Color Palette Generator</h1>
+    <div className="p-4 bg-gray-100 min-h-screen">
+      <h1 className="text-2xl font-bold mb-4">Color Palette Generator</h1>
       
-      <div className="space-y-6">
-        {palettes.map((palette) => (
-          <div key={palette.id} className="bg-white p-4 rounded-lg shadow">
-            <div className="flex gap-1 mb-4">
-              {palette.colors.map((color, index) => (
+      <div className="space-y-4">
+        {palettes.map(palette => (
+          <div key={palette.id} className="bg-white p-4 rounded shadow">
+            <div className="flex gap-1 mb-2">
+              {palette.colors.map((color, i) => (
                 <div 
-                  key={index}
+                  key={i}
                   onClick={() => copyColor(color)}
-                  className="flex-1 h-24 cursor-pointer relative group"
+                  className="flex-1 h-20 relative cursor-pointer"
                   style={{ backgroundColor: color }}
                 >
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-center py-1 opacity-0 group-hover:opacity-100">
-                    {color.toUpperCase()}
+                  <div className="absolute bottom-0 w-full bg-black/50 text-white text-xs p-1 text-center">
+                    {color}
                   </div>
                 </div>
               ))}
             </div>
             <button
               onClick={() => toggleSave(palette.id)}
-              className={`${palette.isSaved ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-2 rounded-md hover:opacity-90`}
+              className={`${palette.isSaved ? 'bg-red-500' : 'bg-green-500'} text-white px-4 py-2 rounded`}
             >
               {palette.isSaved ? 'Unsave' : 'Save'}
             </button>
@@ -72,7 +70,7 @@ export default function ColorPaletteGenerator() {
 
       <button
         onClick={generateMore}
-        className="mt-6 bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600"
+        className="mt-4 bg-blue-500 text-white px-6 py-2 rounded"
       >
         Generate More
       </button>
