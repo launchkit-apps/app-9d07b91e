@@ -7,7 +7,7 @@ export default function ColorPaletteGenerator() {
 
   const generateColor = () => {
     const color = '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-    return color.length === 7 ? color : '#000000'; // Fallback if generation fails
+    return color.length === 7 ? color : '#000000';
   };
 
   const initializePalettes = () => {
@@ -20,7 +20,7 @@ export default function ColorPaletteGenerator() {
       setPalettes(initialPalettes);
     } catch (error) {
       console.error('Error initializing palettes:', error);
-      setPalettes([]); // Set empty array as fallback
+      setPalettes([]);
     }
   };
 
