@@ -3,102 +3,84 @@
 import React, { useState, useEffect } from 'react';
 
 export default function ColorPaletteGenerator() {
-  const [palettes, setPalettes] = useState<Array<{
-    id: string;
-    colors: string[];
-    isSaved: boolean;
-  }>>([]);
+  const [palettes, setPalettes] = useState([]);
 
-  const generateColor = () => {
-    return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
-  };
+  // Generate a random hex color
+  const generateColor = () => '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
 
-  const generatePalette = () => {
-    return {
+  // Initialize palettes
+  useEffect(() => {
+    const initialPalettes = Array(3).fill(null).map(() => ({
       id: Math.random().toString(36).substr(2, 9),
-      colors: Array(5).fill(null).map(() => generateColor()),
+      colors: Array(5).fill(null).map(generateColor),
       isSaved: false
-    };
+    }));
+    setPalettes(initialPalettes);
+  }, []);
+
+  // Copy color code
+  const copyColor = (color) => {
+    navigator.clipboard.writeText(color);
+    alert('Color code copied!');
   };
 
-  const generateNewPalettes = (existingPalettes = []) => {
-    const newPalettes = [...existingPalettes];
-    while (newPalettes.length < 3) {
-      newPalettes.push(generatePalette());
-    }
-    return newPalettes;
-  };
-
-  const copyToClipboard = (hex: string) => {
-    navigator.clipboard.writeText(hex);
-    alert(`Copied ${hex} to clipboard!`);
-  };
-
-  const toggleSave = (id: string) => {
-    setPalettes(palettes.map(palette => 
-      palette.id === id ? { ...palette, isSaved: !palette.isSaved } : palette
+  // Toggle save palette
+  const toggleSave = (id) => {
+    setPalettes(palettes.map(p => 
+      p.id === id ? {...p, isSaved: !p.isSaved} : p
     ));
   };
 
+  // Generate more palettes
   const generateMore = () => {
-    const savedPalettes = palettes.filter(p => p.isSaved);
-    setPalettes(generateNewPalettes(savedPalettes));
+    const saved = palettes.filter(p => p.isSaved);
+    const newPalettes = Array(3 - saved.length).fill(null).map(() => ({
+      id: Math.random().toString(36).substr(2, 9),
+      colors: Array(5).fill(null).map(generateColor),
+      isSaved: false
+    }));
+    setPalettes([...saved, ...newPalettes]);
   };
 
-  useEffect(() => {
-    setPalettes(generateNewPalettes());
-  }, []);
-
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Color Palette Generator</h1>
-        
-        <div className="space-y-6">
-          {palettes.map(palette => (
-            <div 
-              key={palette.id} 
-              className="bg-white p-4 rounded-lg shadow-md"
-            >
-              <div className="flex mb-3">
-                {palette.colors.map((color, index) => (
-                  <div 
-                    key={index} 
-                    className="flex-1 aspect-square relative group"
-                    style={{ backgroundColor: color }}
-                  >
-                    <button
-                      onClick={() => copyToClipboard(color)}
-                      className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white 
-                               py-1 opacity-0 group-hover:opacity-100 transition-opacity text-sm"
-                    >
-                      {color.toUpperCase()}
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <button
-                onClick={() => toggleSave(palette.id)}
-                className={`px-4 py-2 rounded ${
-                  palette.isSaved 
-                    ? 'bg-red-500 hover:bg-red-600' 
-                    : 'bg-green-500 hover:bg-green-600'
-                } text-white transition-colors`}
-              >
-                {palette.isSaved ? 'Unsave' : 'Save'}
-              </button>
+    <div className="p-4 min-h-screen bg-gray-100">
+      <h1 className="text-2xl font-bold mb-4">Color Palette Generator</h1>
+      
+      <div className="space-y-4">
+        {palettes.map((palette) => (
+          <div key={palette.id} className="bg-white p-4 rounded shadow">
+            <div className="flex mb-2">
+              {palette.colors.map((color, i) => (
+                <div 
+                  key={i}
+                  onClick={() => copyColor(color)}
+                  className="flex-1 h-20 cursor-pointer relative group"
+                  style={{ backgroundColor: color }}
+                >
+                  <span className="absolute bottom-0 left-0 right-0 text-center bg-black/50 text-white 
+                                 text-xs py-1 opacity-0 group-hover:opacity-100">
+                    {color}
+                  </span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-
-        <button
-          onClick={generateMore}
-          className="mt-6 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg 
-                   transition-colors font-semibold"
-        >
-          Generate More
-        </button>
+            <button
+              onClick={() => toggleSave(palette.id)}
+              className={`${palette.isSaved ? 'bg-red-500' : 'bg-green-500'} 
+                         text-white px-4 py-2 rounded`}
+            >
+              {palette.isSaved ? 'Unsave' : 'Save'}
+            </button>
+          </div>
+        ))}
       </div>
+
+      <button
+        onClick={generateMore}
+        className="mt-4 bg-blue-500 text-white px-6 py-2 rounded"
+      >
+        Generate More
+      </button>
     </div>
   );
 }
