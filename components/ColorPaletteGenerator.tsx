@@ -9,12 +9,10 @@ export default function ColorPaletteGenerator() {
     isSaved: boolean;
   }>>([]);
 
-  // Generate a random hex color
   const generateColor = () => {
     return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
   };
 
-  // Generate a palette of 5 colors
   const generatePalette = () => {
     return {
       id: Math.random().toString(36).substr(2, 9),
@@ -23,7 +21,6 @@ export default function ColorPaletteGenerator() {
     };
   };
 
-  // Initialize or generate new palettes
   const generateNewPalettes = (existingPalettes = []) => {
     const newPalettes = [...existingPalettes];
     while (newPalettes.length < 3) {
@@ -32,26 +29,22 @@ export default function ColorPaletteGenerator() {
     return newPalettes;
   };
 
-  // Copy hex code to clipboard
   const copyToClipboard = (hex: string) => {
     navigator.clipboard.writeText(hex);
     alert(`Copied ${hex} to clipboard!`);
   };
 
-  // Toggle save state of a palette
   const toggleSave = (id: string) => {
     setPalettes(palettes.map(palette => 
       palette.id === id ? { ...palette, isSaved: !palette.isSaved } : palette
     ));
   };
 
-  // Generate more palettes, keeping saved ones
   const generateMore = () => {
     const savedPalettes = palettes.filter(p => p.isSaved);
     setPalettes(generateNewPalettes(savedPalettes));
   };
 
-  // Initialize palettes on first load
   useEffect(() => {
     setPalettes(generateNewPalettes());
   }, []);
